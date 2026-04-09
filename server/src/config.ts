@@ -10,6 +10,8 @@ export const IS_PRODUCTION = NODE_ENV === "production";
 
 /** SQLite file used by Prisma (same file as DATABASE_URL file:./dev.db) */
 export const SQLITE_FILE_PATH = path.join(__dirname, "../prisma/dev.db");
+/** Separate SQLite file for session store (avoid Prisma schema drift). */
+export const SESSION_SQLITE_FILE_PATH = path.join(__dirname, "../prisma/sessions.db");
 
 export const MAX_LOGIN_ATTEMPTS = 5;
 export const LOCKOUT_MS = 15 * 60 * 1000;

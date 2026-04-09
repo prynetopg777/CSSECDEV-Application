@@ -13,16 +13,24 @@ export async function api<T>(
   path: string,
   init?: RequestInit
 ): Promise<{ ok: boolean; status: number; data: T }> {
-  const res = await fetch(`${base}${path}`, {
-    ...init,
-    credentials: "include",
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
-  const data = (await parseJson(res)) as T;
-  return { ok: res.ok, status: res.status, data };
+  try {
+    const res = await fetch(`${base}${path}`, {
+      ...init,
+      credentials: "include",
+      headers: {
+        ...(init?.body ? { "Content-Type": "application/json" } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+    const data = (await parseJson(res)) as T;
+    return { ok: res.ok, status: res.status, data };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      data: { error: "Cannot reach the API server. Is it running, and is the port correct?" } as T,
+    };
+  }
 }
 
 export type Role = "ADMIN" | "PRODUCT_MANAGER" | "CUSTOMER";

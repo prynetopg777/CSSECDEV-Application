@@ -8,7 +8,7 @@ Full-stack web application built for **CSSECDV-style** secure development requir
 |--------|------------|
 | API | Node.js, Express, TypeScript |
 | Data | Prisma ORM, SQLite (`server/prisma/dev.db`) |
-| Auth | `express-session` with SQLite-backed store (`better-sqlite3-session-store`), Argon2 |
+| Auth | `express-session` with SQLite-backed store (`server/prisma/sessions.db`), Argon2 |
 | Validation | Zod (invalid requests are **rejected**, not “sanitized into” acceptance) |
 | UI | React 18, Vite, React Router |
 
@@ -18,6 +18,8 @@ Full-stack web application built for **CSSECDV-style** secure development requir
 - **npm** 9+
 
 ## Quick start
+
+The commands below are written for **Windows PowerShell** first, with macOS/Linux alternatives where needed.
 
 ### 1. Install dependencies
 
@@ -32,7 +34,7 @@ npm install
 Copy the example env file and adjust values:
 
 ```bash
-copy server\.env.example server\.env
+copy .\server\.env.example .\server\.env
 ```
 
 On macOS/Linux:
@@ -41,11 +43,20 @@ On macOS/Linux:
 cp server/.env.example server/.env
 ```
 
+Open `server/.env` and confirm your API port. The dev proxy in `client/vite.config.ts` is set to:
+
+- `http://127.0.0.1:3001`
+
+So either:
+
+- keep `PORT=3001` in `server/.env`, or
+- if you change `PORT`, also update `client/vite.config.ts` and restart `npm run dev`.
+
 | Variable | Purpose |
 |----------|---------|
 | `DATABASE_URL` | SQLite file (default `file:./dev.db` relative to `server/prisma/`) |
 | `SESSION_SECRET` | Secret for signing session cookies—**use a long random string in production** |
-| `PORT` | API port (default `3000`) |
+| `PORT` | API port (recommended `3001` for this setup) |
 | `NODE_ENV` | `development` or `production` |
 
 ### 3. Database: migrate and seed
@@ -77,7 +88,9 @@ npm run dev
 ```
 
 - **Frontend:** http://localhost:5173 (Vite dev server; proxies `/api` to the API)
-- **API:** http://127.0.0.1:3000
+- **API:** http://127.0.0.1:3001 (or whatever `PORT` is set to in `server/.env`)
+
+If you change the API `PORT`, make sure the Vite proxy matches it in `client/vite.config.ts`, then **restart** `npm run dev`.
 
 Sign in through the UI. The browser stores the session cookie for `localhost` via the proxy.
 
@@ -93,7 +106,7 @@ Then start the API (serves the built SPA from `client/dist` when `NODE_ENV=produ
 
 ```bash
 cd server
-set NODE_ENV=production
+$env:NODE_ENV="production"
 node dist/index.js
 ```
 
@@ -104,7 +117,7 @@ cd server
 NODE_ENV=production node dist/index.js
 ```
 
-Open the app at `http://localhost:3000` (or your configured `PORT`). Set a strong `SESSION_SECRET` and avoid running with default secrets.
+Open the app at `http://localhost:3001` (or your configured `PORT`). Set a strong `SESSION_SECRET` and avoid running with default secrets.
 
 ## Demo accounts (after seed)
 
@@ -141,7 +154,7 @@ Public (unauthenticated) pages: login, register, password reset (security answer
 
 ## Security behavior (summary)
 
-- **Sessions** persisted in SQLite (same DB file as the app data) via `better-sqlite3-session-store`.
+- **Sessions** persisted in a separate SQLite file (`server/prisma/sessions.db`) via `better-sqlite3-session-store`.
 - **Passwords** stored only as Argon2 hashes; optional **password history** to block reuse.
 - **Login** failures use a single generic message; repeated failures trigger **temporary lockout** (see `server/src/config.ts`).
 - **Authorization** is enforced in one place (`server/src/middleware/authorize.ts`) with `requireAuth` and `requireRoles`.
@@ -178,8 +191,9 @@ WebApp/
 
 ## Troubleshooting
 
-- **`EADDRINUSE` on port 3000** — Another process is using the port. Stop it or set a different `PORT` in `server/.env`.
+- **`EADDRINUSE` on API port** — Another process is using your configured API port (often `3001`). Stop it or set a different `PORT` in `server/.env` (and match `client/vite.config.ts` in dev).
 - **401 on every API call after login** — Ensure you use the Vite dev URL (`http://localhost:5173`) so `/api` is proxied and cookies stay on the same site; or in production, use the same origin as the server that set the cookie.
+- **`ECONNREFUSED 127.0.0.1:3000` in Vite logs** — Your API is probably running on `3001` while proxy still points to `3000` (or vice versa). Align `server/.env` `PORT` and `client/vite.config.ts` proxy target, then restart dev servers.
 - **Prisma errors after pulling changes** — Run `npm run db:migrate` (or `npx prisma migrate deploy` in `server/`) and `npx prisma generate` in `server/` if the schema changed.
 
 ## Scripts reference (root)

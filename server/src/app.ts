@@ -5,7 +5,7 @@ import cors from "cors";
 import session from "express-session";
 import Database from "better-sqlite3";
 import sqliteStoreFactory from "better-sqlite3-session-store";
-import { SESSION_SECRET, IS_PRODUCTION, SQLITE_FILE_PATH } from "./config.js";
+import { SESSION_SECRET, IS_PRODUCTION, SESSION_SQLITE_FILE_PATH } from "./config.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authRouter } from "./routes/auth.js";
 import { adminUsersRouter } from "./routes/adminUsers.js";
@@ -30,7 +30,7 @@ export function createApp() {
   );
   app.use(express.json({ limit: "512kb" }));
 
-  const sessionDb = new Database(SQLITE_FILE_PATH);
+  const sessionDb = new Database(SESSION_SQLITE_FILE_PATH);
   app.use(
     session({
       store: new SQLiteStore({
