@@ -34,8 +34,8 @@ export default function App() {
             <Route path="users" element={<AdminUsers />} />
             <Route path="logs" element={<AdminLogs />} />
           </Route>
-          <Route path="*" element={<NotFound />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
   );

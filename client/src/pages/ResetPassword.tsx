@@ -4,10 +4,36 @@ import { api } from "../api";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
+  const [securityQuestion, setSecurityQuestion] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [questionError, setQuestionError] = useState<string | null>(null);
+  const [questionLoading, setQuestionLoading] = useState(false);
   const [done, setDone] = useState(false);
+
+  async function loadSecurityQuestion(emailValue: string) {
+    if (!emailValue) {
+      setSecurityQuestion("");
+      setQuestionError(null);
+      return;
+    }
+
+    setQuestionError(null);
+    setQuestionLoading(true);
+    const { ok, data } = await api<{ securityQuestion?: string; error?: string }>(
+      `/api/auth/security-question?email=${encodeURIComponent(emailValue)}`
+    );
+    setQuestionLoading(false);
+
+    if (!ok || !data.securityQuestion) {
+      setSecurityQuestion("");
+      setQuestionError("Unable to load security question for this email.");
+      return;
+    }
+
+    setSecurityQuestion(data.securityQuestion);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,6 +65,7 @@ export default function ResetPassword() {
         <h1>Reset password</h1>
         <p className="muted">Use the security answer you set at registration.</p>
         {error && <div className="msg msg-error">{error}</div>}
+        {questionError && <div className="msg msg-error">{questionError}</div>}
         <form onSubmit={onSubmit}>
           <div className="field">
             <label htmlFor="email">Email</label>
@@ -47,9 +74,17 @@ export default function ResetPassword() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => void loadSecurityQuestion(email)}
               required
             />
           </div>
+          {questionLoading && <div className="muted">Loading security question…</div>}
+          {securityQuestion && (
+            <div className="field">
+              <label>Security question</label>
+              <div className="card card-inline">{securityQuestion}</div>
+            </div>
+          )}
           <div className="field">
             <label htmlFor="sa">Security answer</label>
             <input

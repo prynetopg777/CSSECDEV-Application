@@ -7,7 +7,7 @@ import {
   MAX_LOGIN_ATTEMPTS,
   PASSWORD_MIN_AGE_MS,
 } from "../config.js";
-import { validateBody } from "../middleware/validate.js";
+import { validateBody, validateQuery } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/authorize.js";
 import { writeAuditLog } from "../lib/audit.js";
 import { validatePasswordComplexity } from "../lib/passwordPolicy.js";
@@ -41,6 +41,10 @@ const resetPasswordSchema = z.object({
   email: z.string().email().max(320),
   securityAnswer: z.string().min(1).max(500),
   newPassword: z.string().min(1).max(500),
+});
+
+const securityQuestionSchema = z.object({
+  email: z.string().email().max(320),
 });
 
 authRouter.post("/login", validateBody(loginSchema), async (req, res) => {
@@ -209,6 +213,23 @@ authRouter.post("/password", requireAuth, validateBody(changePasswordSchema), as
   await writeAuditLog(req, "PASSWORD_CHANGE", "Password changed", { userId: u.id });
   res.json({ ok: true });
 });
+
+authRouter.get(
+  "/security-question",
+  validateQuery(securityQuestionSchema),
+  async (req, res) => {
+    const query = (req as typeof req & { validatedQuery: z.infer<typeof securityQuestionSchema> }).validatedQuery;
+    const email = query.email.toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.securityQuestion) {
+      await writeAuditLog(req, "AUTH_FAILURE", "Security question lookup failed", {
+        metadata: { email },
+      });
+      return res.status(400).json({ error: "Invalid input." });
+    }
+    res.json({ securityQuestion: user.securityQuestion });
+  }
+);
 
 authRouter.post("/reset-password", validateBody(resetPasswordSchema), async (req, res) => {
   const body = req.body as z.infer<typeof resetPasswordSchema>;

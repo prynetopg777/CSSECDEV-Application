@@ -3,11 +3,19 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../api";
 
+const securityQuestionOptions = [
+  "What is your unique recovery phrase? (use random words)",
+  "What is your private passphrase only you know?",
+  "What is the name of your secret security phrase?",
+  "Custom question...",
+];
+
 export default function Register() {
   const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [securityQuestion, setSecurityQuestion] = useState("");
+  const [securityQuestion, setSecurityQuestion] = useState(securityQuestionOptions[0]);
+  const [customQuestion, setCustomQuestion] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -17,12 +25,13 @@ export default function Register() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const question = securityQuestion === "Custom question..." ? customQuestion : securityQuestion;
     const { ok, data } = await api<{ error?: string }>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({
         email,
         password,
-        securityQuestion,
+        securityQuestion: question,
         securityAnswer,
       }),
     });
@@ -73,15 +82,31 @@ export default function Register() {
             />
           </div>
           <div className="field">
-            <label htmlFor="sq">Security question (min 20 characters)</label>
-            <textarea
+            <label htmlFor="sq">Security question</label>
+            <select
               id="sq"
               value={securityQuestion}
               onChange={(e) => setSecurityQuestion(e.target.value)}
-              required
-              minLength={20}
-            />
+            >
+              {securityQuestionOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
+          {securityQuestion === "Custom question..." && (
+            <div className="field">
+              <label htmlFor="custom-sq">Custom security question (min 20 characters)</label>
+              <textarea
+                id="custom-sq"
+                value={customQuestion}
+                onChange={(e) => setCustomQuestion(e.target.value)}
+                required
+                minLength={20}
+              />
+            </div>
+          )}
           <div className="field">
             <label htmlFor="sa">Security answer (min 10 characters)</label>
             <input

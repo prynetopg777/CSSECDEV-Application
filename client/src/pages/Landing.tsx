@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Landing() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -17,36 +17,70 @@ export default function Landing() {
   // If user is authenticated, show dashboard content
   if (user) {
     return (
-      <div>
-        <h1>Dashboard</h1>
-        {notice && <div className="card msg msg-info">{notice}</div>}
-        <div className="card">
-          <p>
-            Signed in as <strong>{user.email}</strong> ({user.role.replace("_", " ")}).
-          </p>
-          <ul className="muted">
-            {user.role === "ADMIN" && (
-              <>
+      <div className="app-shell">
+        <header className="nav">
+          <Link to="/" className="btn btn-ghost">
+            Home
+          </Link>
+          {user.role === "ADMIN" && (
+            <>
+              <Link to="/admin/users" className="btn btn-ghost">
+                Users
+              </Link>
+              <Link to="/admin/logs" className="btn btn-ghost">
+                Audit logs
+              </Link>
+            </>
+          )}
+          {(user.role === "PRODUCT_MANAGER" || user.role === "ADMIN") && (
+            <Link to="/products" className="btn btn-ghost">
+              Products
+            </Link>
+          )}
+          <Link to="/orders" className="btn btn-ghost">
+            Orders
+          </Link>
+          <Link to="/password" className="btn btn-ghost">
+            Change password
+          </Link>
+          <button type="button" className="btn btn-ghost" onClick={() => void logout()}>
+            Log out
+          </button>
+          <span className="muted" style={{ marginLeft: "auto" }}>
+            {user.email} · {user.role.replace("_", " ")}
+          </span>
+        </header>
+        <div>
+          <h1>Dashboard</h1>
+          {notice && <div className="card msg msg-info">{notice}</div>}
+          <div className="card">
+            <p>
+              Signed in as <strong>{user.email}</strong> ({user.role.replace("_", " ")}).
+            </p>
+            <ul className="muted">
+              {user.role === "ADMIN" && (
+                <>
+                  <li>
+                    <Link to="/admin/users">Manage administrators and product managers</Link>
+                  </li>
+                  <li>
+                    <Link to="/admin/logs">View audit logs</Link>
+                  </li>
+                </>
+              )}
+              {(user.role === "PRODUCT_MANAGER" || user.role === "ADMIN") && (
                 <li>
-                  <Link to="/admin/users">Manage administrators and product managers</Link>
+                  <Link to="/products">Products</Link> — catalog (managers edit; admins read-only in UI)
                 </li>
-                <li>
-                  <Link to="/admin/logs">View audit logs</Link>
-                </li>
-              </>
-            )}
-            {(user.role === "PRODUCT_MANAGER" || user.role === "ADMIN") && (
+              )}
               <li>
-                <Link to="/products">Products</Link> — catalog (managers edit; admins read-only in UI)
+                <Link to="/orders">Orders</Link> — customers manage their own; managers see all.
               </li>
-            )}
-            <li>
-              <Link to="/orders">Orders</Link> — customers manage their own; managers see all.
-            </li>
-            <li>
-              <Link to="/password">Change password</Link> (requires current password; one-day minimum age applies).
-            </li>
-          </ul>
+              <li>
+                <Link to="/password">Change password</Link> (requires current password; one-day minimum age applies).
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     );
