@@ -19,7 +19,7 @@ export function Layout({ allowed }: { allowed?: Role[] }) {
     return (
       <div className="app-shell">
         <div className="card msg msg-error">You do not have permission to view this page.</div>
-        <Link to="/dashboard">Back to home</Link>
+        <Link to="/">Back to home</Link>
       </div>
     );
   }
@@ -27,7 +27,7 @@ export function Layout({ allowed }: { allowed?: Role[] }) {
   return (
     <div className="app-shell">
       <header className="nav">
-        <NavLink to="/dashboard">Home</NavLink>
+        <NavLink to="/">Home</NavLink>
         {user.role === "ADMIN" && (
           <>
             <NavLink to="/admin/users">Users</NavLink>

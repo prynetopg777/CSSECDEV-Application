@@ -81,7 +81,7 @@ This guide provides a complete, step-by-step script for demonstrating compliance
 
 ### 2.1.1 Authentication Required for Protected Pages
 3. **Open new incognito window/tab**
-4. **Navigate directly to protected URL** (`http://127.0.0.1:3001/dashboard`)
+4. **Navigate directly to protected URL** (`http://127.0.0.1:3001/products`)
    - **Expected**: Automatically redirected to `/login`
    - **Narrate**: "Attempting to access protected pages without authentication redirects to login"
 
@@ -119,9 +119,9 @@ This guide provides a complete, step-by-step script for demonstrating compliance
 
 ### 2.1.3 Password Hashing
 11. **Login successfully** as admin (`admin@demo.local` / `Demo#Pass12345`)
-    - **Expected**: Redirected to `/dashboard`
+    - **Expected**: Redirected to `/` (root) showing personalized dashboard
     - **Expected**: See last login information if applicable
-    - **Narrate**: "Successful login redirects to the dashboard, not back to the landing page"
+    - **Narrate**: "Successful login redirects to the root URL which now shows the user's personalized dashboard"
 
 12. **Test authenticated API access with Postman**
     - In Postman, send **POST** request to `/api/auth/login` with body:
