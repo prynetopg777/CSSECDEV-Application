@@ -1,0 +1,17 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/admin/users'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "manager@example.com",
+      "password": "Str0ngP@ssw0rd!",
+      "role": "PRODUCT_MANAGER",
+      "securityQuestion": "What city were you born in when you were a child?",
+      "securityAnswer": "Davao City"
+    }

@@ -1,0 +1,67 @@
+$kind: http-request
+name: 'List Audit Logs (Admin)'
+method: GET
+url: '{{baseUrl}}/api/admin/logs'
+order: 1000
+queryParams:
+  - key: eventType
+    value: AUTH_FAILURE
+    description: 'Optional event type filter'
+    disabled: true
+  - key: from
+    value: '2024-01-01T00:00:00.000Z'
+    description: 'Optional ISO datetime lower bound'
+    disabled: true
+  - key: to
+    value: '2024-12-31T23:59:59.999Z'
+    description: 'Optional ISO datetime upper bound'
+    disabled: true
+  - key: limit
+    value: '100'
+    description: 'Optional result limit, max 200'
+    disabled: true
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Demo guide steps 34-37 (2.4.4): Audit logs are restricted to admins.
+      // Run while logged in as admin to exercise the 200 path.
+      // Log in as a customer first to demonstrate the 403 path.
+
+      const status = pm.response.code;
+
+      if (status === 200) {
+        // Admin access path (demo guide step 37)
+        pm.test('[Admin] Status is 200 OK', function () {
+          pm.response.to.have.status(200);
+        });
+
+        pm.test('[Admin] Response is valid JSON', function () {
+          pm.response.to.be.json;
+        });
+
+        pm.test('[Admin] Response contains audit log entries', function () {
+          const json = pm.response.json();
+          const isArray = Array.isArray(json);
+          const hasLogs = typeof json === 'object' && json !== null &&
+            ('logs' in json || 'data' in json || 'events' in json);
+          pm.expect(isArray || hasLogs).to.be.true;
+        });
+      } else if (status === 403) {
+        // Non-admin access path (demo guide step 34-35: customer gets 403)
+        pm.test('[Non-Admin] Status is 403 Forbidden', function () {
+          pm.response.to.have.status(403);
+        });
+
+        pm.test('[Non-Admin] Response body indicates access denied', function () {
+          const body = pm.response.text().toLowerCase();
+          pm.expect(body).to.satisfy(function (b) {
+            return b.includes('forbidden') || b.includes('permission') ||
+              b.includes('access denied') || b.includes('unauthorized');
+          });
+        });
+      } else {
+        pm.test('Unexpected status - expected 200 (admin) or 403 (non-admin)', function () {
+          pm.expect([200, 403]).to.include(status);
+        });
+      }

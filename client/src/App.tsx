@@ -5,6 +5,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
+import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Password from "./pages/Password";
 import AdminUsers from "./pages/AdminUsers";
@@ -17,13 +18,14 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
-            <Route index element={<Home />} />
+            <Route path="dashboard" element={<Home />} />
             <Route path="password" element={<Password />} />
             <Route path="products" element={<Products />} />
             <Route path="orders" element={<Orders />} />

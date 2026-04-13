@@ -1,0 +1,48 @@
+$kind: http-request
+name: 'Login (Admin - Happy Path)'
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{adminEmail}}",
+      "password": "{{adminPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Demo guide step 2 & 12: Login should return 200 with user info and session data
+      pm.test('Status is 200 OK', function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test('Response contains user object', function () {
+        const json = pm.response.json();
+        pm.expect(json).to.have.property('user');
+      });
+
+      pm.test('User object has email field', function () {
+        const json = pm.response.json();
+        pm.expect(json.user).to.have.property('email');
+      });
+
+      pm.test('Response contains lastSuccessfulLoginAt timestamp', function () {
+        const json = pm.response.json();
+        pm.expect(json.user).to.have.property('lastSuccessfulLoginAt');
+      });
+
+      pm.test('Response contains lastFailedLoginAt timestamp', function () {
+        const json = pm.response.json();
+        pm.expect(json.user).to.have.property('lastFailedLoginAt');
+      });
+
+      pm.test('Response does not expose password hash', function () {
+        const body = pm.response.text();
+        pm.expect(body).to.not.include('"password"');
+      });

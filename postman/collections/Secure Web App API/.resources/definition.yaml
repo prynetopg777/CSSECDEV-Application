@@ -1,0 +1,11 @@
+$kind: collection
+name: 'Secure Web App API'
+variables:
+  - key: baseUrl
+    value: 'http://127.0.0.1:3001'
+  - key: adminEmail
+    value: 'admin@demo.local'
+    description: 'Administrator account email (seeded by database)'
+  - key: adminPassword
+    value: 'Demo#Pass12345'
+    description: 'Administrator account password (seeded by database)'

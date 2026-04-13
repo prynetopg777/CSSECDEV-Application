@@ -1,0 +1,16 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/products'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Wireless Keyboard",
+      "description": "Compact keyboard with multi-device Bluetooth support.",
+      "price": 49.99,
+      "stock": 120
+    }

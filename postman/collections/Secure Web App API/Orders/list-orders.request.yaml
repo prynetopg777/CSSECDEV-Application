@@ -1,0 +1,44 @@
+$kind: http-request
+name: 'List Orders (Authenticated)'
+method: GET
+url: '{{baseUrl}}/api/orders'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Demo guide step 3 & 12: Authenticated GET /api/orders should return 200
+      // Run this request AFTER the Login request to exercise the authenticated path.
+      // If no session cookie is present, the API returns 401 (unauthenticated path).
+
+      const status = pm.response.code;
+
+      if (status === 401) {
+        // Demo guide step 1 & 5: Unauthenticated access validation
+        pm.test('[Unauthenticated] Status is 401 Unauthorized', function () {
+          pm.response.to.have.status(401);
+        });
+
+        pm.test('[Unauthenticated] Error body is "Authentication required."', function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property('error');
+          pm.expect(json.error).to.eql('Authentication required.');
+        });
+      } else {
+        // Authenticated path
+        pm.test('[Authenticated] Status is 200 OK', function () {
+          pm.response.to.have.status(200);
+        });
+
+        pm.test('[Authenticated] Response is valid JSON', function () {
+          pm.response.to.be.json;
+        });
+
+        pm.test('[Authenticated] Response body is an array or contains orders key', function () {
+          const json = pm.response.json();
+          const isArray = Array.isArray(json);
+          const hasOrders = typeof json === 'object' && json !== null &&
+            ('orders' in json || 'data' in json);
+          pm.expect(isArray || hasOrders).to.be.true;
+        });
+      }

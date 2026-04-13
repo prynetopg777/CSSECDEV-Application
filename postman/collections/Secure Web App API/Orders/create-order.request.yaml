@@ -1,0 +1,15 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/orders'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "productName": "Wireless Keyboard",
+      "quantity": 2,
+      "notes": "Please deliver during business hours."
+    }

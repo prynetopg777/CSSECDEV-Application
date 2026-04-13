@@ -1,0 +1,19 @@
+$kind: http-request
+method: PATCH
+url: '{{baseUrl}}/api/products/:id'
+order: 3000
+pathVariables:
+  - key: id
+    value: 'product-id'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Wireless Keyboard Pro",
+      "description": "Updated keyboard description.",
+      "price": 59.99,
+      "stock": 100
+    }
