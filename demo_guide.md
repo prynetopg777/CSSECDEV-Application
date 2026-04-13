@@ -119,9 +119,9 @@ This guide provides a complete, step-by-step script for demonstrating compliance
 
 ### 2.1.3 Password Hashing
 11. **Login successfully** as admin (`admin@demo.local` / `Demo#Pass12345`)
-    - **Expected**: Redirected to dashboard
+    - **Expected**: Redirected to `/dashboard`
     - **Expected**: See last login information if applicable
-    - **Narrate**: "Successful login shows last access times"
+    - **Narrate**: "Successful login redirects to the dashboard, not back to the landing page"
 
 12. **Test authenticated API access with Postman**
     - In Postman, send **POST** request to `/api/auth/login` with body:

@@ -26,7 +26,7 @@ export default function Login() {
         lines.push(`Last failed attempt: ${new Date(meta.lastFailedLoginAt).toLocaleString()}`);
       }
       sessionStorage.setItem("loginNotice", lines.join("\n"));
-      nav("/", { replace: true });
+      nav("/dashboard", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid username and/or password.");
     }
